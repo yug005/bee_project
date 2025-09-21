@@ -22,6 +22,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- API Endpoints ---
+//endpoinys\
 
 // Use the imported route modules
 app.use('/api', userRoutes);

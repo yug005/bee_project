@@ -6,6 +6,9 @@ const { PrismaClient } = require('@prisma/client');
 const { seedTrains } = require('./utils/seed');
 
 //  routes
+// const userRoutes = require('./routes/users');
+// const trainRoutes = require('./routes/trains');
+// const bookingRoutes = require('./routes/bookings');
 const userRoutes = require('./routes/users');
 const trainRoutes = require('./routes/trains');
 const bookingRoutes = require('./routes/bookings');

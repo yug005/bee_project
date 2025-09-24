@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Management System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dark-mode-toggle {
+            transition: all 0.3s ease;
+        }
+        .dark-mode-toggle svg {
+            transition: transform 0.3s ease;
+        }
+        .dark .sun-icon {
+            transform: rotate(180deg);
+        }
+        .dark .moon-icon {
+            transform: rotate(0deg);
+        }
+        #message-container {
+            min-height: 4rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300 font-sans">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        
+        <!-- Header with Dark Mode Toggle and Time Display -->
+        <header class="w-full max-w-2xl mx-auto flex justify-between items-center mb-6">
+            <div id="time-display" class="font-semibold text-gray-600 dark:text-gray-400">Current Time:</div>
+            <button id="mode-toggle" class="dark-mode-toggle p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-300">
+                <svg id="sun-icon" class="w-6 h-6 text-yellow-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M4.375 4.375l.707.707m0 15.325l.707-.707M12 18a6 6 0 100-12 6 6 0 000 12z" />
+                </svg>
+                <svg id="moon-icon" class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </header>
+
+        <main class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transform transition-transform duration-500 scale-95 opacity-0" id="main-card">
+            <div id="loader" class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-800 z-50 transition-opacity duration-300 opacity-0 hidden">
+                <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.062 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            
+            <div id="message-container" class="mb-6"></div>
+            <div id="view-container"></div>
+        </main>
+    </div>
+
+    <!-- Main JavaScript File -->
+    <script src="js/main.js"></script>
+
+    <script>
+        // Animate the main card after the DOM is loaded
+        window.addEventListener('load', () => {
+            const mainCard = document.getElementById('main-card');
+            mainCard.classList.remove('scale-95', 'opacity-0');
+            mainCard.classList.add('scale-100', 'opacity-100');
+        });
+    </script>
+</body>
+</html>

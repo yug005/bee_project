@@ -11,10 +11,22 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.16.2",
+    "@socket.io/redis-adapter": "^8.3.0",
     "bcryptjs": "^3.0.2",
+    "bull": "^4.16.5",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "i18next": "^25.6.1",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.16.2"
+    "nodemailer": "^7.0.10",
+    "prisma": "^6.16.2",
+    "qrcode": "^1.5.4",
+    "redis": "^5.9.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }

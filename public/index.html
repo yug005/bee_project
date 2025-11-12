@@ -3,11 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Railway Management System</title>
+    <meta name="description" content="Book train tickets online. Search trains, check availability, and book your journey instantly.">
+    <meta name="theme-color" content="#1e40af">
+    <title>RailBooker - Professional Train Booking System</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/images/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="RailBooker">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/style.css">
+    
     <style>
         .dark-mode-toggle {
             transition: all 0.3s ease;
@@ -22,49 +39,212 @@
             transform: rotate(0deg);
         }
         #message-container {
-            min-height: 4rem;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+        
+        .slide-in {
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .hero-pattern {
+            background-image: 
+                linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(139, 92, 246, 0.9)),
+                url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
         }
     </style>
 </head>
-<body class="bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300 font-sans">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
-        
-        <!-- Header with Dark Mode Toggle and Time Display -->
-        <header class="w-full max-w-2xl mx-auto flex justify-between items-center mb-6">
-            <div id="time-display" class="font-semibold text-gray-600 dark:text-gray-400">Current Time:</div>
-            <button id="mode-toggle" class="dark-mode-toggle p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-300">
-                <svg id="sun-icon" class="w-6 h-6 text-yellow-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M4.375 4.375l.707.707m0 15.325l.707-.707M12 18a6 6 0 100-12 6 6 0 000 12z" />
-                </svg>
-                <svg id="moon-icon" class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-            </button>
-        </header>
+    <!-- Header Navigation -->
+    <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-train text-3xl text-blue-600"></i>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        RailBooker
+                    </h1>
+                </div>
 
-        <main class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transform transition-transform duration-500 scale-95 opacity-0" id="main-card">
-            <div id="loader" class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-800 z-50 transition-opacity duration-300 opacity-0 hidden">
-                <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.062 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <!-- Nav Actions -->
+                <div class="flex items-center space-x-4">
+                    <!-- Language Selector -->
+                    <div class="language-selector">
+                        <select id="language-select" class="text-sm focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+                            <option value="en">🇬🇧 English</option>
+                            <option value="hi">🇮🇳 हिन्दी</option>
+                            <option value="es">🇪🇸 Español</option>
+                        </select>
+                    </div>
+
+                    <!-- Dark Mode Toggle -->
+                    <button id="mode-toggle" class="dark-mode-toggle p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <svg id="sun-icon" class="w-6 h-6 text-yellow-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M4.375 4.375l.707.707m0 15.325l.707-.707M12 18a6 6 0 100-12 6 6 0 000 12z" />
+                        </svg>
+                        <svg id="moon-icon" class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+
+                    <!-- Time Display -->
+                    <div id="time-display" class="hidden md:flex items-center space-x-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <i class="far fa-clock"></i>
+                        <span id="time-text">--:--:--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Message Container (Toast Notifications) -->
+    <div id="message-container"></div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 min-h-screen">
+        <!-- Loader -->
+        <div id="loader" class="fixed inset-0 bg-white dark:bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 hidden">
+            <div class="text-center">
+                <div class="loader-spinner mx-auto mb-4"></div>
+                <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Loading...</p>
+            </div>
+        </div>
+
+        <!-- View Container -->
+        <div id="view-container" class="max-w-7xl mx-auto"></div>
+
+        <!-- Modal Container -->
+        <div id="booking-modal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div id="modal-content" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform scale-95 opacity-0 transition-all duration-300"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-train text-2xl text-blue-500"></i>
+                        <h3 class="text-xl font-bold text-white">RailBooker</h3>
+                    </div>
+                    <p class="text-sm text-gray-400">Your trusted partner for seamless train ticket booking experience.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-white mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Contact</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Careers</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-white mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Terms & Conditions</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-white mb-4">Connect With Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors"><i class="fab fa-facebook-f text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors"><i class="fab fa-instagram text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors"><i class="fab fa-linkedin-in text-xl"></i></a>
+                    </div>
+                </div>
             </div>
             
-            <div id="message-container" class="mb-6"></div>
-            <div id="view-container"></div>
-        </main>
-    </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2025 RailBooker. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
+    <!-- Socket.IO Client -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- Translations -->
+    <script src="js/translations.js"></script>
+    
+    <!-- Seat Selection Component -->
+    <script src="js/seatSelection.js"></script>
+    
     <!-- Main JavaScript File -->
     <script src="js/main.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    if (confirm('New version available! Reload to update?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('❌ Service Worker registration failed:', error);
+                    });
+                
+                // Handle controller change (new service worker activated)
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    window.location.reload();
+                });
+            });
+        }
+        
+        // Install prompt disabled - keeping PWA features active
+        
+        // Online/Offline status
+        window.addEventListener('online', () => {
+            console.log('🟢 Back online!');
+            showMessage('Back online! Syncing data...', 'success');
+        });
+        
+        window.addEventListener('offline', () => {
+            console.log('🔴 Offline mode');
+            showMessage('You are offline. Viewing cached data.', 'warning');
+        });
+    </script>
 
     <script>
-        // Animate the main card after the DOM is loaded
+        // Animate on load
         window.addEventListener('load', () => {
-            const mainCard = document.getElementById('main-card');
-            mainCard.classList.remove('scale-95', 'opacity-0');
-            mainCard.classList.add('scale-100', 'opacity-100');
+            document.body.style.opacity = '1';
         });
     </script>
 </body>

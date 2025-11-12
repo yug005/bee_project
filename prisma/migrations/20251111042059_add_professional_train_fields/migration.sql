@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "public"."Train" ADD COLUMN     "arrivalTime" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "class" TEXT NOT NULL DEFAULT 'Economy',
+ADD COLUMN     "duration" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "price" DOUBLE PRECISION NOT NULL DEFAULT 50.0,
+ADD COLUMN     "trainNumber" TEXT NOT NULL DEFAULT '';

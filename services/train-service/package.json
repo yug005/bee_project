@@ -1,0 +1,21 @@
+{
+  "name": "train-service",
+  "version": "1.0.0",
+  "description": "Train management microservice for RailBooker",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@prisma/client": "^5.7.0",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "ioredis": "^5.3.2",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

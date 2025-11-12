@@ -1,0 +1,36 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#1e40af"/>
+  
+  <!-- Train Icon -->
+  <g transform="translate(128, 140)">
+    <!-- Train body -->
+    <rect x="0" y="40" width="256" height="160" rx="20" fill="white"/>
+    
+    <!-- Windows -->
+    <rect x="20" y="60" width="70" height="60" rx="10" fill="#1e40af"/>
+    <rect x="110" y="60" width="70" height="60" rx="10" fill="#1e40af"/>
+    
+    <!-- Door -->
+    <rect x="200" y="60" width="36" height="100" rx="8" fill="#60a5fa"/>
+    
+    <!-- Bottom wheels -->
+    <circle cx="60" cy="220" r="20" fill="#374151"/>
+    <circle cx="60" cy="220" r="10" fill="#6b7280"/>
+    <circle cx="196" cy="220" r="20" fill="#374151"/>
+    <circle cx="196" cy="220" r="10" fill="#6b7280"/>
+    
+    <!-- Top chimney -->
+    <rect x="30" y="20" width="40" height="25" rx="5" fill="white"/>
+    
+    <!-- Front nose -->
+    <path d="M 0 80 L -20 140 L 0 140 Z" fill="#60a5fa"/>
+    
+    <!-- Rails indicator -->
+    <line x1="-40" y1="240" x2="296" y2="240" stroke="white" stroke-width="4"/>
+    <line x1="-40" y1="250" x2="296" y2="250" stroke="white" stroke-width="4"/>
+  </g>
+  
+  <!-- App name -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">RailBooker</text>
+</svg>

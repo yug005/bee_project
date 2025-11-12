@@ -1,5 +1,5 @@
 const Queue = require('bull');
-const { sendEmail } = require('../config/email');
+const { emailServiceClient } = require('../config/emailServiceClient');
 
 // Queue configuration
 const queueConfig = {
@@ -15,17 +15,17 @@ const emailQueue = new Queue('email-queue', queueConfig);
 const bookingQueue = new Queue('booking-queue', queueConfig);
 const notificationQueue = new Queue('notification-queue', queueConfig);
 
-// Email Queue Processor
+// Email Queue Processor - Uses Email Microservice
 emailQueue.process(async (job) => {
     const { to, template, data } = job.data;
     
     console.log(`📧 Processing email job ${job.id} for ${to}`);
     
     try {
-        const result = await sendEmail(to, template, data);
+        const result = await emailServiceClient.sendEmail(to, template, data);
         
         if (result.success) {
-            console.log(`✅ Ticket confirmation email sent to ${to}`);
+            console.log(`✅ Ticket confirmation email sent to ${to} via microservice`);
             return { success: true, messageId: result.messageId };
         } else {
             throw new Error(result.error);

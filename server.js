@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const http = require('http');
+const session = require('express-session');
 const { Server } = require('socket.io');
 const { createAdapter } = require('@socket.io/redis-adapter');
 const { PrismaClient } = require('@prisma/client');
@@ -10,6 +11,7 @@ const { seedDatabase } = require('./utils/seed');
 const { verifyEmailConfig } = require('./config/email');
 const { redisClient, redisSubscriber, redisPublisher, cache, pubsub } = require('./config/redis');
 const { queueHelpers } = require('./config/queue');
+const passport = require('./config/passport');
 
 //  routes
 const userRoutes = require('./routes/users');
@@ -17,6 +19,7 @@ const trainRoutes = require('./routes/trains');
 const bookingRoutes = require('./routes/bookings');
 const locationRoutes = require('./routes/locations');
 const adminRoutes = require('./routes/admin');
+const authRoutes = require('./routes/auth');
 
 // Initialization 
 const app = express();
@@ -34,6 +37,22 @@ app.set('queue', queueHelpers);
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Session configuration for Passport
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -42,6 +61,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //endpoinys\
 
 // Use the imported route modules
+app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api', trainRoutes);
 app.use('/api', bookingRoutes);

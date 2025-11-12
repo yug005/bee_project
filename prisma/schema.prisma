@@ -8,12 +8,15 @@ provider = "prisma-client-js"
 }
 
 model User {
-id       Int       @id @default(autoincrement())
-username String?
-email    String    @unique
-password String
-role     String    @default("user")
-bookings Booking[]
+id            Int       @id @default(autoincrement())
+username      String?
+email         String    @unique
+password      String?
+role          String    @default("user")
+googleId      String?   @unique
+profilePicture String?
+provider      String    @default("local") // local, google
+bookings      Booking[]
 }
 
 model State {

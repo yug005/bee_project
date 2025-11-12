@@ -7,16 +7,36 @@ const bcrypt = require('bcryptjs');
 
 // User Registration (Secure with password hashing)
 router.post('/register', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, username } = req.body;
+    
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required.' });
+    }
+    
     try {
         // Hash the password before storing
         const hashedPassword = await bcrypt.hash(password, 10);
-        await prisma.user.create({ data: { email, password: hashedPassword } });
-        res.status(201).json({ message: 'User registered successfully!' });
+        const user = await prisma.user.create({ 
+            data: { 
+                email, 
+                password: hashedPassword,
+                username: username || email.split('@')[0],
+                provider: 'local'
+            } 
+        });
+        res.status(201).json({ 
+            message: 'User registered successfully!',
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username
+            }
+        });
     } catch (e) {
         if (e.code === 'P2002') {
             return res.status(409).json({ error: 'User with this email already exists.' });
         }
+        console.error('Registration error:', e);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 });
@@ -24,32 +44,54 @@ router.post('/register', async (req, res) => {
 // User Login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-        return res.status(400).json({ error: 'Invalid credentials.' });
+    
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required.' });
     }
     
-    // Compare hashed password
-    const validPassword = await bcrypt.compare(password, user.password);
-    
-    if (!validPassword) {
-        return res.status(400).json({ error: 'Invalid credentials.' });
-    }
-    const token = jwt.sign({ 
-        id: user.id, 
-        email: user.email, 
-        role: user.role || 'user' 
-    }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
-    res.json({ 
-        token, 
-        message: 'Login successful!',
-        user: {
-            id: user.id,
-            email: user.email,
-            role: user.role || 'user'
+    try {
+        const user = await prisma.user.findUnique({ where: { email } });
+        
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid credentials.' });
         }
-    });
+        
+        // If the account was created via a third-party provider and has no password,
+        // prevent password login and instruct user to use their provider.
+        if (user.provider && user.provider !== 'local' && !user.password) {
+            return res.status(400).json({ 
+                error: 'This account uses an external provider. Please sign in using that provider.' 
+            });
+        }
+        
+        // Compare hashed password
+        const validPassword = await bcrypt.compare(password, user.password);
+        
+        if (!validPassword) {
+            return res.status(400).json({ error: 'Invalid credentials.' });
+        }
+        
+        const token = jwt.sign({ 
+            id: user.id, 
+            email: user.email, 
+            role: user.role || 'user' 
+        }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        
+        res.json({ 
+            token, 
+            message: 'Login successful!',
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                role: user.role || 'user',
+                profilePicture: user.profilePicture
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'An error occurred during login.' });
+    }
 });
 
 // Add a new user (for administrative purposes, protected route - INSECURE)

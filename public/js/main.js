@@ -4,6 +4,8 @@ let userToken = localStorage.getItem('userToken') || null;
 let socket = null;
 let currentUser = null;
 
+// (Google OAuth removed) Handle tokens via standard login flows only.
+
 // DOM Elements
 const viewContainer = document.getElementById('view-container');
 const messageContainer = document.getElementById('message-container');
@@ -133,6 +135,17 @@ function renderLoginView() {
                 <p class="text-gray-600 dark:text-gray-400">${t('welcomeBack')}</p>
             </div>
             
+            <!-- Google login removed: use email/password login below -->
+            
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-gray-50 dark:bg-gray-900 text-gray-500">Or continue with email</span>
+                </div>
+            </div>
+            
             <form id="login-form" class="space-y-5">
                 <div>
                     <label for="login-email" class="block text-sm font-semibold mb-2">
@@ -190,6 +203,17 @@ function renderRegisterView() {
                 <i class="fas fa-user-plus text-6xl text-green-600 mb-4"></i>
                 <h2 class="text-3xl font-bold mb-2">${t('register')}</h2>
                 <p class="text-gray-600 dark:text-gray-400">Create your account to book tickets</p>
+            </div>
+            
+            <!-- Google signup removed: use email/password registration below -->
+            
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-gray-50 dark:bg-gray-900 text-gray-500"></span>
+                </div>
             </div>
             
             <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-600 p-4 mb-6 rounded">

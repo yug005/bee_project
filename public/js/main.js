@@ -822,7 +822,8 @@ function showBookingModal(booking = null, train = null) {
                             class="w-full p-2 text-sm rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-500">
                     </div>
                     
-                    <!-- Seat Selection -->
+                    <!-- Seat Selection or Waiting List Notice -->
+                    ${train.availableSeats > 0 ? `
                     <div class="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
                         <label class="block text-xs font-semibold mb-2">
                             <i class="fas fa-chair mr-1 text-blue-600"></i>Select Your Seat
@@ -831,6 +832,28 @@ function showBookingModal(booking = null, train = null) {
                         <input type="hidden" id="selected-coach" name="coach">
                         <input type="hidden" id="selected-seat" name="seatNumber">
                     </div>
+                    ` : `
+                    <div class="border-2 border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900 rounded-lg p-4 mb-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl mr-3 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-yellow-800 dark:text-yellow-200 mb-2">
+                                    <i class="fas fa-train mr-1"></i>Train Fully Booked
+                                </h4>
+                                <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-2">
+                                    All seats are currently occupied. You will be added to the <strong>Waiting List</strong>.
+                                </p>
+                                <ul class="text-xs text-yellow-600 dark:text-yellow-400 space-y-1 ml-4">
+                                    <li><i class="fas fa-check-circle mr-1"></i>Your seat will be auto-assigned when available</li>
+                                    <li><i class="fas fa-bell mr-1"></i>You'll receive instant notification upon confirmation</li>
+                                    <li><i class="fas fa-list-ol mr-1"></i>Lower waiting list position = Higher chance of confirmation</li>
+                                </ul>
+                                <input type="hidden" id="selected-coach" name="coach" value="">
+                                <input type="hidden" id="selected-seat" name="seatNumber" value="">
+                            </div>
+                        </div>
+                    </div>
+                    `}
                     
                     <!-- Billing Summary - Compact -->
                     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
@@ -855,8 +878,8 @@ function showBookingModal(booking = null, train = null) {
                         <button type="button" id="close-modal" class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all">
                             ${t('cancel')}
                         </button>
-                        <button type="submit" id="confirm-btn" data-id="${train.id}" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all">
-                            <i class="fas fa-check mr-2"></i>${t('confirm')} & Pay
+                        <button type="submit" id="confirm-btn" data-id="${train.id}" class="flex-1 ${train.availableSeats > 0 ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700'} text-white px-4 py-2 rounded-lg font-semibold transition-all">
+                            <i class="fas ${train.availableSeats > 0 ? 'fa-check' : 'fa-list'} mr-2"></i>${train.availableSeats > 0 ? t('confirm') + ' & Pay' : 'Join Waiting List'}
                         </button>
                     </div>
                 </form>
@@ -864,33 +887,28 @@ function showBookingModal(booking = null, train = null) {
         `;
         document.getElementById('booking-form').addEventListener('submit', handleBookTrain);
         
-        // Initialize seat map with occupied seats based on available seats
-        // Calculate how many seats should be shown as booked
-        const totalSeatsInCoach = train.totalSeats;
-        const availableSeats = train.availableSeats;
-        const seatsToBook = totalSeatsInCoach - availableSeats;
-        
-        // Generate list of booked seat IDs (randomly distributed across coaches)
-        const bookedSeatsList = [];
-        const layout = getSeatLayoutForClass(train.class || 'Sleeper');
-        
-        if (availableSeats === 0) {
-            // All seats occupied for waiting list
-            for (let i = 1; i <= totalSeatsInCoach; i++) {
-                const coachIndex = Math.floor((i - 1) / layout.seatsPerCoach);
-                const seatInCoach = ((i - 1) % layout.seatsPerCoach) + 1;
-                bookedSeatsList.push(`${layout.coaches[coachIndex]}-${seatInCoach}`);
-            }
-        } else {
+        // Initialize seat map only if seats are available
+        if (train.availableSeats > 0) {
+            // Initialize seat map with occupied seats based on available seats
+            // Calculate how many seats should be shown as booked
+            const totalSeatsInCoach = train.totalSeats;
+            const availableSeats = train.availableSeats;
+            const seatsToBook = totalSeatsInCoach - availableSeats;
+            
+            // Generate list of booked seat IDs (randomly distributed across coaches)
+            const bookedSeatsList = [];
+            const layout = getSeatLayoutForClass(train.class || 'Sleeper');
+            
             // Mark seats as booked leaving availableSeats free
             for (let i = 1; i <= seatsToBook; i++) {
                 const coachIndex = Math.floor((i - 1) / layout.seatsPerCoach);
                 const seatInCoach = ((i - 1) % layout.seatsPerCoach) + 1;
                 bookedSeatsList.push(`${layout.coaches[coachIndex]}-${seatInCoach}`);
             }
+            
+            initializeSeatMap(train.class || 'Sleeper', bookedSeatsList);
         }
-        
-        initializeSeatMap(train.class || 'Sleeper', bookedSeatsList);
+        // If no seats available, seat map won't be shown (waiting list mode)
     }
 
     modal.classList.remove('hidden');
@@ -1043,7 +1061,10 @@ async function handleBookTrain(e) {
         return;
     }
     
-    if (!seatNumber || !coachNumber) {
+    // Only require seat selection if seat/coach inputs have values (meaning seats are available)
+    // For waiting list (no available seats), these will be empty strings from hidden inputs
+    const hasSeatInputs = document.getElementById('seat-map-container');
+    if (hasSeatInputs && (!seatNumber || !coachNumber)) {
         showMessage('Please select a seat', 'warning');
         return;
     }
@@ -1063,8 +1084,9 @@ async function handleBookTrain(e) {
                 journeyDate,
                 passengerName,
                 passengerAge: parseInt(passengerAge),
-                seatNumber,
-                coachNumber
+                seatNumber: seatNumber || null,
+                coachNumber: coachNumber || null,
+                allowWaitingList: true
             })
         });
 
@@ -1073,7 +1095,12 @@ async function handleBookTrain(e) {
 
         if (response.ok) {
             const userEmail = localStorage.getItem('userEmail') || 'your email';
-            showMessage(t('bookingSuccess') + ` PNR: ${data.booking.pnrNumber}. Ticket sent to ${userEmail}! 📧`, 'success');
+            const bookingStatus = data.booking.status;
+            const statusMessage = bookingStatus === 'Waiting' 
+                ? `Added to Waiting List at position WL${data.booking.waitingPosition}! You'll be notified when confirmed. 🔔`
+                : `PNR: ${data.booking.pnrNumber}. Ticket sent to ${userEmail}! 📧`;
+            
+            showMessage(t('bookingSuccess') + ` ${statusMessage}`, bookingStatus === 'Waiting' ? 'info' : 'success');
             if (socket && socket.connected) {
                 socket.emit('new-booking', { trainId, userId: 'current-user', timestamp: new Date() });
             }

@@ -54,9 +54,9 @@ router.post('/trains/:id/book', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { journeyDate, passengerName, passengerAge, seatNumber, coachNumber, allowWaitingList = true } = req.body;
 
-    // Validate required fields
-    if (!journeyDate || !passengerName || !passengerAge || !seatNumber || !coachNumber) {
-        return res.status(400).json({ error: 'All booking details are required (journey date, passenger info, and seat selection).' });
+    // Validate required fields (seat details only required if seats are available)
+    if (!journeyDate || !passengerName || !passengerAge) {
+        return res.status(400).json({ error: 'Journey date and passenger information are required.' });
     }
 
     try {
@@ -71,19 +71,29 @@ router.post('/trains/:id/book', authenticateToken, async (req, res) => {
                 return res.status(404).json({ error: 'Train not found.' });
             }
 
-            // Check if seat is already booked for this train and date
-            const seatBooking = await tx.booking.findFirst({ 
-                where: { 
-                    trainId,
-                    journeyDate: new Date(journeyDate),
-                    seatNumber,
-                    coachNumber,
-                    status: { in: ['Confirmed', 'RAC'] }
-                } 
-            });
+            // Check if seats are available
+            const seatsAvailable = train.availableSeats > 0;
 
-            if (seatBooking) {
-                return res.status(409).json({ error: 'This seat is already booked for the selected date.' });
+            // If seats are available, seat selection is required
+            if (seatsAvailable && (!seatNumber || !coachNumber)) {
+                return res.status(400).json({ error: 'Seat and coach selection required when seats are available.' });
+            }
+
+            // If seats available, check if the specific seat is already booked
+            if (seatsAvailable && seatNumber && coachNumber) {
+                const seatBooking = await tx.booking.findFirst({ 
+                    where: { 
+                        trainId,
+                        journeyDate: new Date(journeyDate),
+                        seatNumber,
+                        coachNumber,
+                        status: { in: ['Confirmed', 'RAC'] }
+                    } 
+                });
+
+                if (seatBooking) {
+                    return res.status(409).json({ error: 'This seat is already booked for the selected date.' });
+                }
             }
 
             // Check if user already has a booking
@@ -126,8 +136,8 @@ router.post('/trains/:id/book', authenticateToken, async (req, res) => {
                     journeyDate: new Date(journeyDate),
                     passengerName,
                     passengerAge: parseInt(passengerAge),
-                    seatNumber,
-                    coachNumber,
+                    seatNumber: seatNumber || '', // Empty for waiting list
+                    coachNumber: coachNumber || '', // Empty for waiting list
                     status: bookingStatus,
                     waitingPosition: waitingPosition
                 },
